@@ -1,5 +1,7 @@
 "use strict";
 
+document.documentElement.classList.remove("no-js");
+
 const header = document.querySelector(".site-header");
 const menuButton = document.querySelector(".menu-toggle");
 const navigation = document.querySelector(".nav-links");
@@ -50,27 +52,33 @@ navigationLinks.forEach((link) => {
   });
 });
 
-const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.14 }
-);
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: "0px 0px 40px 0px" }
+  );
 
-revealElements.forEach((element) => observer.observe(element));
+  revealElements.forEach((element) => observer.observe(element));
+} else {
+  revealElements.forEach((element) => element.classList.add("visible"));
+}
 
 document.addEventListener("mousemove", (event) => {
   if (!cursorGlow) return;
   cursorGlow.style.left = `${event.clientX}px`;
   cursorGlow.style.top = `${event.clientY}px`;
-  customCursor.style.left = `${event.clientX}px`;
-  customCursor.style.top = `${event.clientY}px`;
-  customCursor.classList.toggle("interactive", Boolean(event.target.closest("a, button")));
+  if (customCursor) {
+    customCursor.style.left = `${event.clientX}px`;
+    customCursor.style.top = `${event.clientY}px`;
+    customCursor.classList.toggle("interactive", Boolean(event.target.closest("a, button")));
+  }
 });
 
 document.getElementById("year").textContent = new Date().getFullYear();
